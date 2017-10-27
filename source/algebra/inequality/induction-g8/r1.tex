@@ -1,0 +1,97 @@
+% $date: 2017-06-09
+% $timetable:
+%   g8r1:
+%     2017-06-09:
+%       2:
+%   g8r2:
+%     2017-06-11:
+%       1:
+
+\worksheet*{Индукция в неравенствах}
+
+% $authors:
+% - Алексей Сергеевич Семченков
+
+% $build$matter[print]: [[.], [.]]
+% $build$matter[print,author]: [[.]]
+% $build$style[print,author]:
+% - .[resize-to]
+
+\begin{problems}
+
+\item
+Докажите, что есть такое $n$, что $1{,}001^{n} \geq 2017$.
+
+\item
+Определим $L_{n}$ как 
+\(
+    \frac{1}{\sqrt{1}} + \frac{1}{\sqrt{2}} + \ldots + \frac{1}{\sqrt{n}}
+\).
+Докажите, что $L_{n} \geq 2 \sqrt{n + 3} - 3$. 
+
+\item
+Определим гармонический ряд $H_{n}$ как 
+\(
+    1 + \frac{1}{2} + \frac{1}{3} + \ldots + \frac{1}{n}
+\).
+Докажите, что найдется такой $n$, что $H_{n} \geq 2017$.
+
+\item
+Положим величину $T_{n}$ равной
+\(
+    \left( 1 + \frac{1}{1} \right)
+    \left( 1 + \frac{1}{3} \right)
+    \ldots
+    \left( 1 + \frac{1}{2n - 1} \right)
+\).
+Докажите, что $T_{n} \geq \sqrt{2 n + 1}$.
+
+\item
+Положим величину $S_{n}$ равной
+\(
+    \left( 1 - \frac{1}{2} \right)
+    \left( 1 - \frac{1}{4} \right)
+    \ldots
+    \left( 1 - \frac{1}{2n} \right)
+\).
+\\
+\subproblem
+Докажите, что $S_{n} \leq \frac{1}{\sqrt{2 n + 1}}$.
+\\
+\subproblem
+Докажите, что $S_{n} \leq \frac{1}{\sqrt{2 n + 2}}$.
+
+\item
+Сформулируем неравенство средних для $n$~переменных:\\
+для любых положительных $x_1, x_2, \ldots, x_n$ верно:
+\[
+    \frac{x_{1} + x_{2} + \ldots + x_{n}}{n}
+\geq
+    \sqrt[n]{x_{1} x_{2} \ldots x_{n}}
+\]
+\subproblem
+Докажите неравенство, когда $n$ --- степень двойки.
+\\
+\subproblem
+Докажите, что если неравенство верно для любых $n$~переменных, то оно верно
+и~для любых $n - 1$ переменных.
+\\
+\subproblem
+Докажите, что неравенство выполнено для любых $n$~переменных.
+
+\item
+Докажите, что для любого $n$ выполнено неравенство
+\begin{subproblemeq}
+    \frac{1}{1 \cdot 2} + \frac{1}{2 \cdot 3} + \ldots
+    + \frac{1}{n \cdot (n + 1)}
+<
+    1
+\end{subproblemeq};
+\begin{subproblemeq}
+    1 + \frac{1}{4} + \frac{1}{9} + \cdots + \frac{1}{n^2}
+<
+    2
+\end{subproblemeq}.
+
+\end{problems}
+

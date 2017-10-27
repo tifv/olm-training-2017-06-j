@@ -1,0 +1,91 @@
+$groups$matter: true
+
+Integral:
+  $groups$delegate: false
+  $groups$delegate$into: false
+  $groups$matter: false
+  $groups$matter$into: false
+
+  $style:
+  - document class: book
+    options: [10pt, a4paper]
+  - delegate: ..[no-document-class]
+
+  $matter[-add-toc]:
+  - .[add-toc]
+
+  $matter[-integral,add-toc]:
+
+  - error:
+      "'source-link' and 'print' options are incompatible"
+    condition: [source-link, print]
+
+  - preamble package: hyperref
+    condition: -print
+  - preamble verbatim: \hypersetup{colorlinks}
+    provide: hypersetup:colorlinks
+    condition: [source-link, -print]
+
+  - verbatim: \frontmatter
+  - - delegate: /integral[-add-toc]
+  - verbatim: \tableofcontents
+
+  - verbatim: \mainmatter
+  - delegate: .[integral]
+
+  $matter[integral]:
+  - delegate: g8r1
+  - delegate: g8r2
+  - delegate: g8r3
+  - delegate: g9r1
+  - delegate: g9r2
+  - delegate: g9r3
+
+  g8r1:
+    $matter:
+    - verbatim: \chapter{8-1}
+      condition: {not: no-chapter}
+    - verbatim: \begin{jeolmlabelspace}{g8r1}
+    - delegate: /[g8r1]
+    - verbatim: \end{jeolmlabelspace}
+
+  g8r2:
+    $matter:
+    - verbatim: \chapter{8-2}
+      condition: {not: no-chapter}
+    - verbatim: \begin{jeolmlabelspace}{g8r2}
+    - delegate: /[g8r2]
+    - verbatim: \end{jeolmlabelspace}
+
+  g8r3:
+    $matter:
+    - verbatim: \chapter{8-3}
+      condition: {not: no-chapter}
+    - verbatim: \begin{jeolmlabelspace}{g8r3}
+    - delegate: /[g8r3]
+    - verbatim: \end{jeolmlabelspace}
+
+  g9r1:
+    $matter:
+    - verbatim: \chapter{9-1}
+      condition: {not: no-chapter}
+    - verbatim: \begin{jeolmlabelspace}{g9r1}
+    - delegate: /[g9r1]
+    - verbatim: \end{jeolmlabelspace}
+
+  g9r2:
+    $matter:
+    - verbatim: \chapter{9-2}
+      condition: {not: no-chapter}
+    - verbatim: \begin{jeolmlabelspace}{g9r2}
+    - delegate: /[g9r2]
+    - verbatim: \end{jeolmlabelspace}
+
+  g9r3:
+    $matter:
+    - verbatim: \chapter{9-3}
+      condition: {not: no-chapter}
+    - verbatim: \begin{jeolmlabelspace}{g9r3}
+    - delegate: /[g9r3]
+    - verbatim: \end{jeolmlabelspace}
+

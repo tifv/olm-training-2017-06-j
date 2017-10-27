@@ -1,0 +1,24 @@
+announcement:
+  $date: 6--9 июня 2017 г.
+  $authors:
+  - Юлий Васильевич Тихонов
+
+  $style[-announcement]:
+  - .[announcement]
+
+  $build$style[print]:
+  - .[a6paper,landscape,2-on-1]
+  $build$matter[print]:
+  - - verbatim: \let\section\worksheet
+    - .
+  - - preamble package: verbatim
+    - verbatim: \begingroup \let\input\verbatiminput \let\section\worksheet
+    - verbatim: \fontsize{8.05}{9.66}\selectfont
+    - .[no-header]
+    - verbatim: \endgroup
+
+  $matter[-section-guard]:
+  - verbatim: \begingroup\let\section\worksheet
+  - .[section-guard]
+  - verbatim: \endgroup % \let\section
+
