@@ -46,6 +46,10 @@
 % These macros do not make much sense outside of automated build system, which
 % requires ability to <<relocate>> figure files.
 %
+% Alternative usage, enabled by |lazy-figures| package option,
+% supplements |\jeolmfiguremap| with automatic mapping of \meta{name} to
+% |figures/|\meta{name}|.pdf| (or |.eps| if |.pdf| is not allowed).
+%
 % \subsection{Problem numbering}
 %
 % \DescribeMacro{\problem}
@@ -149,16 +153,13 @@
 %
 % \subsection{Statements}
 %
-% Other than problems, structural elements include
-% |\definition|, |\theorem|, |\lemma|, and |\statement|.
+% The command is |\claim|\marg{caption}.
 %
-% The basic command is |\claim|\marg{caption}.
+% \claim{Теорема}
+% For |\claim{Теорема}|.
 %
-% \theorem
-% For |\theorem|.
-%
-% \theoremof{ван Обеля}
-% For |\theoremof{ван Обеля}|.
+% \claim{Теорема ван Обеля}
+% For |\claim{Теорема ван Обеля}|.
 %
 % \claim{Лемма Фату}
 % For |\claim{Лемма Фату}|.
@@ -178,6 +179,20 @@
 %    \begin{macrocode}
 \RequirePackage{amsmath}
 \RequirePackage{amssymb}
+\RequirePackage{graphicx}
+\RequirePackage{currfile}
+%    \end{macrocode}
+%
+% \subsection{Package options}
+%
+%    \begin{macrocode}
+\newif\ifjeolmfigure@lazy
+    \jeolmfigure@lazyfalse
+\DeclareOption{lazy-figures}{\jeolmfigure@lazytrue}
+%    \end{macrocode}
+%
+%    \begin{macrocode}
+\ProcessOptions
 %    \end{macrocode}
 %
 % \subsection{Some definitions}
@@ -197,6 +212,7 @@
     {\@kratno@template{\scriptstyle}{\sf@size}}%
     {\@kratno@template{\scriptscriptstyle}{\ssf@size}}%
 }
+\newcommand\nkratno{\mathrel{\not{\kratno}}}
 %    \end{macrocode}
 %
 % Allow exchanging greek letters with their variants.
@@ -270,18 +286,6 @@
 \hspace{0.5\@resizeto@width}\mathstrut}
 %    \end{macrocode}
 %
-% \subsection{Package options}
-%
-%    \begin{macrocode}
-\newif\ifjeolmfigure@lazy
-    \jeolmfigure@lazyfalse
-\DeclareOption{lazy-figures}{\jeolmfigure@lazytrue}
-%    \end{macrocode}
-%
-%    \begin{macrocode}
-\ProcessOptions
-%    \end{macrocode}
-%
 % \subsection{Figures}
 %
 % \begin{macro}{\jeolmfiguremap}
@@ -294,27 +298,44 @@
 % \end{macro}
 %
 % \begin{macro}{\jeolmfigure}
-% The first variant of macro is not to be used in automatic environment.
+% In automatic environment, where all figures are predictable and are
+% built in advance, strict variant of the macro should be used.
+%    \begin{macrocode}
+\newcommand\jeolmfigure@strict[2][]{%
+    \edef\jeolmfigure@name{\csname jeolmfiguremap@#2\endcsname}%
+    \includegraphics[#1]{\jeolmfigure@name}}
+%    \end{macrocode}
+% The lazy variant of the macro, although a functional replacement for strict
+% variant, is not to be used in automatic environment.
 % Rather, it allows latexmk to catch up with all figures on second run.
-% (This implies that latexmk will be able to rebuild missing figures, like
-% from Asymptote source. Also, in this variant figures must be specified by
-% full name, with extension.)
+% This implies that latexmk will be able to rebuild missing figures, like
+% from Asymptote source.
+%    \begin{macrocode}
+\newcommand\jeolmfigure@lazy[2][]{%
+    \ifcsname jeolmfiguremap@#2\endcsname
+      \edef\jeolmfigure@name{\csname jeolmfiguremap@#2\endcsname}%
+    \else
+      \edef\jeolmfigure@name{\jeolmfiguredir#2\jeolmfiguresuffix}%
+    \fi
+    \IfFileExists{\jeolmfigure@name}%
+        {\includegraphics[#1]{\jeolmfigure@name}}%
+        {\leavevmode
+            \PackageWarning{jeolm}{file `\jeolmfigure@name' not found}}%
+}
+\newcommand\jeolmfiguredir{\currfiledir figures/}
+\def\jeolm@ifpdfgraphics#1\jeolmend{\in@{,.pdf,}{,#1,}\ifin@}
+\expandafter\jeolm@ifpdfgraphics\Gin@extensions\jeolmend
+    \newcommand\jeolmfiguresuffix{.pdf}
+\else
+    \newcommand\jeolmfiguresuffix{.eps}
+\fi
+%    \end{macrocode}
+% Resolve package option.
 %    \begin{macrocode}
 \ifjeolmfigure@lazy
-    \newcommand\jeolmfigure[2][]{%
-        \edef\jeolmfigure@name{\csname jeolmfiguremap@#2\endcsname}%
-        \IfFileExists{\jeolmfigure@name}%
-            {\includegraphics[#1]{\jeolmfigure@name}}%
-            {\PackageWarning{jeolm}{file `\jeolmfigure@name' not found}}%
-    }
-%    \end{macrocode}
-% In automatic environment, where all figures are predictable and are
-% built in advance, second variant should be used instead.
-%    \begin{macrocode}
+    \let\jeolmfigure\jeolmfigure@lazy
 \else
-    \newcommand\jeolmfigure[2][]{%
-        \edef\jeolmfigure@name{\csname jeolmfiguremap@#2\endcsname}%
-        \includegraphics[#1]{\jeolmfigure@name}}
+    \let\jeolmfigure\jeolmfigure@strict
 \fi
 %    \end{macrocode}
 % \end{macro}
@@ -428,6 +449,7 @@
 \newcommand\setproblem[1]{\setcounter{jeolmproblem}{#1}}
 \newcommand\resetproblem{\setcounter{jeolmproblem}{0}}
 \newcommand\problem@numbering{\arabic}
+\newcommand\problem@counter{jeolmproblem}
 %    \end{macrocode}
 % \end{macro}
 % \end{macro}
@@ -455,7 +477,7 @@
 % managed by |\item| command itself.
 %    \begin{macrocode}
 \newcommand\problem@in@item{\problemx@in@item{}}
-\newcommand\problemx@in@item[1]{\problem@yx{\problem@numbering{jeolmproblem}}{#1}}
+\newcommand\problemx@in@item[1]{\problem@yx{\problem@numbering{\problem@counter}}{#1}}
 %    \end{macrocode}
 % \end{macro}
 %
@@ -513,14 +535,17 @@
 %
 % \begin{macro}{\problem@format}
 % \begin{macro}{\problem@space}
+% \begin{macro}{\problem@format@text}
 %    \begin{macrocode}
 \newlength\problem@space@length
 \problem@space@length=1em
 \newcommand\problem@space{\hspace{\problem@space@length}\ignorespaces}
-\newcommand\problem@format[2]{\begingroup\bfseries
+\newcommand\problem@format@text{\bfseries}
+\newcommand\problem@format[2]{\begingroup\problem@format@text
     #1.\rlap{\!#2}%
 \endgroup}
 %    \end{macrocode}
+% \end{macro}
 % \end{macro}
 % \end{macro}
 %
@@ -547,16 +572,19 @@
 %
 % \begin{macro}{\subproblem@format}
 % \begin{macro}{\subproblem@space}
+% \begin{macro}{\subproblem@format@text}
 %    \begin{macrocode}
 \newlength\subproblem@space@length
 \newlength\@subproblem@letter@width
 \subproblem@space@length=0.5em
 \newcommand\subproblem@space{\hspace{\subproblem@space@length}\ignorespaces}
 \newcommand\subproblem@space@math{\mspace{20mu}}
-\newcommand\subproblem@format[2]{\text{\begingroup\bfseries
-(\resizeto{\kernagainst{#1#2}{(}{)}}{\kernagainst{m#2}{(}{)}})%
-\endgroup}}
+\newcommand\subproblem@format@text{\problem@format@text}
+\newcommand\subproblem@format[2]{\text{\begingroup\subproblem@format@text
+    (\resizeto{\kernagainst{#1#2}{(}{)}}{\kernagainst{m#2}{(}{)}})%
+    \endgroup}}
 %    \end{macrocode}
+% \end{macro}
 % \end{macro}
 % \end{macro}
 %
@@ -569,16 +597,16 @@
 % Macros |\itemx|, |\itemy| and |\itemyx| are defined only inside the
 % environment.
 %    \begin{macrocode}
-\let\itemx\problem@itemx
-\let\itemy\problem@itemy
-\let\itemyx\problem@itemyx
+    \let\itemx\problem@itemx
+    \let\itemy\problem@itemy
+    \let\itemyx\problem@itemyx
 %    \end{macrocode}
 % Macro |\problem@in@item@current| can be redefined on the fly.
 % This is used by |\itemx|.
 %    \begin{macrocode}
-\begin{list}{\problem@in@item@current}{%
-\leftmargin=2.45em\labelsep=\problem@space@length%
-\@nmbrlisttrue\def\@listctr{jeolmproblem}}%
+    \begin{list}{\problem@in@item@current}{%
+        \leftmargin=2.45em\labelsep=\problem@space@length%
+        \@nmbrlisttrue\def\@listctr{\problem@counter}}%
 }{\end{list}}
 %    \end{macrocode}
 % \end{environment}
@@ -586,14 +614,25 @@
 %    \begin{macrocode}
 \let\problem@in@item@current\problem@in@item
 \newcommand\problem@itemx[1]{%
-\def\problem@in@item@current{\problemx@in@item{#1}}%
-\item%
-\let\problem@in@item@current\problem@in@item}
+    \def\problem@in@item@current{\problemx@in@item{#1}}%
+    \item%
+    \let\problem@in@item@current\problem@in@item}
 \newcommand\problem@itemy[1]{%
-\item[\problem@format{#1}{}]\problem@label{#1}\resetsubproblem}
+    \item[\problem@format{#1}{}]\problem@label{#1}\resetsubproblem}
 \newcommand\problem@itemyx[2]{%
-\item[\problem@format{#1}{#2}]\problem@label{#1}\resetsubproblem}
+    \item[\problem@format{#1}{#2}]\problem@label{#1}\resetsubproblem}
 %    \end{macrocode}
+%
+% \begin{environment}{exercises}
+%    \begin{macrocode}
+\newenvironment{exercises}{%
+    \renewcommand\problem@format@text{\mdseries}%
+    \renewcommand\problem@counter{enumi}\setcounter{enumi}{0}%
+    \begin{problems}%
+}{\end{problems}}
+%    \end{macrocode}
+% \end{environment}
+%
 %
 % \subsection{Statements}
 %
@@ -604,65 +643,9 @@
 %    \end{macrocode}
 % \end{macro}
 %
-% \begin{macro}{\theorem}
-% \begin{macro}{\theoremof}
-%    \begin{macrocode}
-\newcommand\theorem{\claim{Теорема}}
-\newcommand\theoremof[1]{\claim{Теорема #1}}
-%    \end{macrocode}
-% \end{macro}
-% \end{macro}
-%
-% \begin{macro}{\definition}
-% \begin{macro}{\lemma}
-% \begin{macro}{\statement}
-%    \begin{macrocode}
-\newcommand\definition{\claim{Определение}}
-\newcommand\lemma{\claim{Лемма}}
-\newcommand\statement{\claim{Утверждение}}
-%    \end{macrocode}
-% \end{macro}
-% \end{macro}
-% \end{macro}
-%
 %    \begin{macrocode}
 %</package>
 %    \end{macrocode}
-%
-% \subsection{Tinkering with equations}
-%
-% \begin{environment}{problemeq}
-% \begin{environment}{problemeq*}
-% \begin{environment}{subproblemeq}
-% \begin{environment}{subproblemeq*}
-%    \begin{macrocode}
-\newsavebox\problemequation
-\newlength\problemeq@skip
-\problemeq@skip=0.5ex
-\newlength\problemeq@height
-\newlength\problemeq@depth
-\newcommand\problemeq@usebox[1]{%
-    \settoheight{\problemeq@height}{\usebox#1}%
-    \addtolength{\problemeq@height}{\problemeq@skip}%
-    \settodepth{\problemeq@depth}{\usebox#1}%
-    \addtolength{\problemeq@depth}{\problemeq@skip}%
-    \raisebox{0pt}[\problemeq@height][\problemeq@depth]{\usebox#1}%
-}
-\newenvironment{problemeq}
-    {\parskip=0pt\par%
-        \begin{lrbox}{\problemequation}\(\displaystyle}
-    {\)\end{lrbox}\problemeq@usebox\problemequation\thinspace}
-\newenvironment{problemeq*}{\thinspace\(}{\)\thinspace}
-\newenvironment{subproblemeq}
-    {\parskip=0pt\par\subproblem%
-        \begin{lrbox}{\problemequation}\(\displaystyle}
-    {\)\end{lrbox}\problemeq@usebox\problemequation\thinspace}
-\newenvironment{subproblemeq*}{\subproblem\(}{\)\thinspace}
-%    \end{macrocode}
-% \end{environment}
-% \end{environment}
-% \end{environment}
-% \end{environment}
 %
 % \Finale
 %
