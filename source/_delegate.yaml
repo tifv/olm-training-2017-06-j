@@ -6,13 +6,3 @@ _style:
   $groups$matter$into: false
   $groups$matter: false
 
-$groups$matter$order: default
-olympiad:
-  $groups$matter$order: date
-algebra:
-  $groups$matter$order: date
-geometry:
-  $groups$matter$order: date
-combinatorics:
-  $groups$matter$order: date
-

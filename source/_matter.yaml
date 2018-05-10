@@ -1,5 +1,15 @@
 $groups$matter: true
 
+$groups$matter$order: default
+algebra:
+  $groups$matter$order: date
+geometry:
+  $groups$matter$order: date
+combinatorics:
+  $groups$matter$order: date
+olympiad:
+  $groups$matter$order: date
+
 Integral:
   $groups$delegate: false
   $groups$delegate$into: false
